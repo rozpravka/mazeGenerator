@@ -5,6 +5,7 @@ export class Maze {
         this.width = width;
         this.height = height;
         this.grid = this.generateGrid();
+
     }
     grid: Cell[][] = [];
 
@@ -80,9 +81,7 @@ export class Maze {
     }
 
     generateMaze(): void {
-        if (!this.grid || this.grid.length === 0) {
-            throw new Error("Grid not initialized. Call generateGrid first.");
-        }
+        if (!this.grid || this.grid.length === 0) throw new Error("Grid not initialized. Call generateGrid first.");
     
         let startCell = this.grid[0][0];
         this.iterativeBacktracker(startCell);
@@ -111,6 +110,45 @@ export class Maze {
                 stack.pop();
             }
         }
+    }
+
+    prepareCellsForPathfinding(): void {
+        if (!this.grid || this.grid.length === 0) throw new Error("Grid not initialized. Call generateGrid first.");
+        for (var row = 0; row < this.height; row++) {
+            for (var col = 0; col < this.width; col++) {
+                const cell: Cell = this.grid[row][col];
+                cell.visitedDuringPathfinding = false;
+                cell.hCost = ((this.height - 1) - row) + ((this.width - 1) - col);
+            }
+        }
+    }
+
+    findPath(endRow: number, endCol: number): void {
+        if (!this.grid || this.grid.length === 0) throw new Error("Grid not initialized. Call generateGrid first.");
+        else this.prepareCellsForPathfinding();
+
+        let currentCell = this.grid[0][0];
+        let endCell = this.grid[endRow][endCol];
+
+        while (currentCell != endCell) {
+            currentCell.visitedDuringPathfinding = true;
+            this.getConnectedNeighbors(currentCell);
+            var minHCost = currentCell.connectedNeighbors[0].hCost;
+            var nextCell = currentCell.connectedNeighbors[0];
+            for (var neighbor of currentCell.connectedNeighbors) {
+                if (!neighbor.visitedDuringPathfinding && neighbor.hCost <= minHCost) nextCell = neighbor;
+            }
+            currentCell = nextCell;
+        }
+        this.grid[endRow][endCol].visitedDuringPathfinding = true;
+    }
+            
+
+    getConnectedNeighbors(cell: Cell): void {
+        if (cell.connectedTop) cell.connectedNeighbors.push(this.grid[cell.row - 1][cell.col]);
+        if (cell.connectedBottom) cell.connectedNeighbors.push(this.grid[cell.row + 1][cell.col]);
+        if (cell.connectedLeft) cell.connectedNeighbors.push(this.grid[cell.row][cell.col - 1]);
+        if (cell.connectedRight) cell.connectedNeighbors.push(this.grid[cell.row][cell.col + 1]);
     }
     
     printCellMiddleContents(cell: Cell): string {

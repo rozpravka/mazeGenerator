@@ -3,7 +3,7 @@ export class Cell {
         this.row = row;
         this.col = col;
     }
-
+    
     topNeighbor: boolean = true;
     bottomNeighbor: boolean = true;
     leftNeighbor: boolean = true;
@@ -15,4 +15,6 @@ export class Cell {
     connectedLeft: boolean = false;
     connectedTop: boolean = false;
     connectedBottom: boolean = false;
+    connectedNeighbors: Cell[] = [];
+    hCost: number = Infinity;   // heuristic cost to the end node
 }
